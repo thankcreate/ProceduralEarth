@@ -7,14 +7,19 @@ public class BuildingHighLevel : Building
     public int[] sectionFloors;
     public bool needRoof = false;
     public bool needBase = false;
-    public bool needSectionEdge = false;
+    public bool needSectionConnection = false;
 
     public int shapeEdgeCount = 4;
     public float floorHeight = 0.1f;
 
     public float baseHeightByFloor = 1f;
-    public float connectionHeightByFloor = 0.5f;
+    public float connectionHeightByFloor = 0.5f;    
+    public float roofHeightByFloor = 5f;
 
+
+
+    public float decreaseUnit = 0.03f;
+    public float connectionIncreaseUnit = 0;
 
 
     // Start is called before the first frame update
@@ -38,8 +43,6 @@ public class BuildingHighLevel : Building
     int buildingFaceIndex = 0;
     float currentUnit = 1;
 
-    public float  decreaseUnit = 0.03f;
-
 
     protected override void InitBuildingFaces()
     {
@@ -50,7 +53,7 @@ public class BuildingHighLevel : Building
         int sectionCount = sectionFloors.Length;
         int roofCount = needRoof ? 1 : 0;
         int baseCount = needBase ? 1 : 0;
-        int edgeCount = needSectionEdge ? sectionCount + roofCount - 1 : 0;
+        int edgeCount = needSectionConnection ? sectionCount : 0;
 
         int buildingFaceCount = sectionCount + roofCount + baseCount + edgeCount;
         buildingFaces = new BuildingFace[buildingFaceCount];
@@ -64,15 +67,32 @@ public class BuildingHighLevel : Building
             bf.height = floorHeight * baseHeightByFloor;
             bf.FaceType = BuildingFace.BuildingFaceType.CONNECTION;
             PushBuildingFace(bf);
-
-            
         }
 
-        foreach(int floors in sectionFloors)
-        {
+        for(int i = 0; i < sectionFloors.Length; i++)
+        {            
+            int floors = sectionFloors[i];
             var bf = GenerateBuildingFace(currentUnit, floors);
             bf.startHeight = currentHeight;
             bf.FaceType = BuildingFace.BuildingFaceType.REGULAR;
+            PushBuildingFace(bf);
+
+            if(needSectionConnection)
+            {
+                var edge = GenerateBuildingFace(bf.unit + connectionIncreaseUnit, 1);
+                edge.startHeight = currentHeight;
+                edge.height = floorHeight * connectionHeightByFloor;
+                edge.FaceType = BuildingFace.BuildingFaceType.CONNECTION;
+                PushBuildingFace(edge, false);
+            }
+        }
+
+        if(needRoof)
+        {
+            var bf = GenerateBuildingFace(currentUnit, 1);
+            bf.startHeight = currentHeight;
+            bf.height = floorHeight * roofHeightByFloor;
+            bf.FaceType = BuildingFace.BuildingFaceType.ROOF;
             PushBuildingFace(bf);
         }
     }
@@ -82,6 +102,7 @@ public class BuildingHighLevel : Building
         var bf = new BuildingFace(this, mesh);
         bf.floorHeight = floorHeight;
         bf.floors = floors;
+        bf.unit = unit;
 
         var angle = 0.0f;
         bf.baseShape = new Vector2[shapeEdgeCount];
@@ -96,10 +117,11 @@ public class BuildingHighLevel : Building
         return bf;
     }
 
-    void PushBuildingFace(BuildingFace bf)
+    void PushBuildingFace(BuildingFace bf, bool needDecreaseUnit = true)
     {
         buildingFaces[buildingFaceIndex++] = bf;
         currentHeight += bf.GetHeight();
-        currentUnit -= decreaseUnit;
+        if(needDecreaseUnit)
+            currentUnit -= decreaseUnit;
     }
 }

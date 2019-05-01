@@ -122,8 +122,12 @@ public class Earth : MonoBehaviour
         //Debug.Log("Max " + maxFactor);
         MakeHeightColorMapFromGradient();
 
-        earthMaterial.SetTexture("_heightColorTexture", heightColorTex);
-        earthMaterial.SetVector("_elevationMinMax", new Vector4(minFactor, maxFactor));
+        //earthMaterial.SetTexture("_heightColorTexture", heightColorTex);
+        //earthMaterial.SetVector("_elevationMinMax", new Vector4(minFactor, maxFactor));
+        earthMaterial.SetTexture("_HeightColorTex", heightColorTex);
+
+        earthMaterial.SetFloat("_Min", minFactor);
+        earthMaterial.SetFloat("_Max", maxFactor);
     }
 
 

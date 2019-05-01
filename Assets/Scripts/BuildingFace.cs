@@ -30,6 +30,8 @@ public class BuildingFace
     BuildingFaceType faceType;
     public BuildingFaceType FaceType { set => faceType = value; get => faceType; }
 
+    [HideInInspector]
+    public float unit;
 
 
     public BuildingFace(Building building, Mesh mesh)
@@ -100,6 +102,10 @@ public class BuildingFace
 
     void ConstructSideFaces()
     {
+        // Roof doesn't need side face
+        if (faceType == BuildingFaceType.ROOF)
+            return;
+
         var sideCount = baseShape.Length;
 
         // Bottom line accumulated length, used to calculate UV
@@ -156,6 +162,12 @@ public class BuildingFace
             var leftTopPosi = new Vector3(baseShape[i].x, GetTopY(), baseShape[i].y);
             var rightBottomPosi = new Vector3(baseShape.Looped(i + 1).x, GetBottomY(), baseShape.Looped(i + 1).y);
             var rightTopPosi = new Vector3(baseShape.Looped(i + 1).x, GetTopY(), baseShape.Looped(i + 1).y);
+
+            if(faceType == BuildingFaceType.ROOF)
+            {
+                leftTopPosi = new Vector3(baseShape[i].x, GetBottomY(), baseShape[i].y);
+                rightTopPosi = new Vector3(baseShape.Looped(i + 1).x, GetBottomY(), baseShape.Looped(i + 1).y);
+            }
 
             // Bottom
             var leftBottomIndex = curVerticesIndex;
