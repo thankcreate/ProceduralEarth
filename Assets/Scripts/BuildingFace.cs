@@ -4,7 +4,7 @@ using UnityEngine;
 
 [RequireComponent(typeof(MeshFilter))]
 [RequireComponent(typeof(MeshRenderer))]
-public class BuildingPrimitive : MonoBehaviour
+public class BuildingFace 
 {
     public Vector2[] baseShape;
     public float height;
