@@ -1,23 +1,33 @@
-﻿using System.Collections;
+﻿using Sirenix.OdinInspector;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class Building : MonoBehaviour
 {
-    public Vector2[] baseShape;
-    public float height;
-    public float floorHeight = 0.2f;
-    public int floors = 10;
-    MeshFilter meshFilter;
-    Mesh mesh;
-    MeshRenderer meshRenderer;
+    [HideInInspector]
+    public List<Vector3> vertexList;
+    [HideInInspector]
+    public List<int> triList;
+    [HideInInspector]
+    public List<Vector2> uvList;
 
+    protected MeshFilter meshFilter;
+    protected Mesh mesh;
+    protected MeshRenderer meshRenderer;
 
+    [HideIf("HideBuildingFaces")]
+    public BuildingFace[] buildingFaces;
     public Material material;
 
-    BuildingFace[] buildingFaces;
 
-    void InitProperty()
+    protected virtual bool HideBuildingFaces()
+    {
+        return false;
+    }
+
+
+    protected virtual void Initialize()
     {
         meshFilter = GetComponent<MeshFilter>();
         if (meshFilter.sharedMesh == null)
@@ -28,6 +38,13 @@ public class Building : MonoBehaviour
 
         meshRenderer = GetComponent<MeshRenderer>();
         meshRenderer.sharedMaterial = material;
+
+        InitBuildingFaces();
+    }
+
+    protected virtual void InitBuildingFaces()
+    {
+
     }
 
     // Start is called before the first frame update
@@ -49,15 +66,43 @@ public class Building : MonoBehaviour
 
     void Generate()
     {
-        InitProperty();
+        Initialize();
         GenerateMesh();
     }
 
     void GenerateMesh()
     {
-        
+        if (vertexList == null)
+            vertexList = new List<Vector3>();
+
+        if (triList == null)
+            triList = new List<int>();
+
+        if (uvList == null)
+            uvList = new List<Vector2>();
+
+        vertexList.Clear();
+        triList.Clear();
+        uvList.Clear();
+
+        foreach (var bf in buildingFaces)
+        {
+            bf.InitParam(this, mesh);
+            bf.ConstructMesh();
+        }
+
+        ApplyDataToMesh();
     }
 
+    void ApplyDataToMesh()
+    {
+        mesh.Clear();
+
+        mesh.vertices = vertexList.ToArray();
+        mesh.triangles = triList.ToArray();
+        mesh.uv = uvList.ToArray();
+        mesh.RecalculateNormals();
+    }
 
 
 }
