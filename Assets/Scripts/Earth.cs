@@ -5,7 +5,8 @@ using UnityEngine;
 
 public class Earth : MonoBehaviour
 {
-  
+    [Title("Noise")]
+    public EarthNoise[] noiseArray;
     [Title("Shape")]
     [Range(2, 256)]
     public int resolution = 10;
@@ -13,21 +14,21 @@ public class Earth : MonoBehaviour
     public float radius = 1;
 
 
-    [Title("Noise")]
-    public float noiseFrequency;
-    public float noiseStrength;
-    public Vector3 noiseOffset;    
-    public float noiseThreshould;
+    //[Title("Noise")]
+    //public float noiseFrequency;
+    //public float noiseStrength;
+    //public Vector3 noiseOffset;    
+    //public float noiseThreshould;
 
-    [ValidateInput("GreaterAndEqualThanOne", "Layer must be more than one", InfoMessageType.Error)]
-    public int noiseMultiLayer = 1;
+    //[ValidateInput("GreaterAndEqualThanOne", "Layer must be more than one", InfoMessageType.Error)]
+    //public int noiseMultiLayer = 1;
 
-    // larger than 1
-    [ValidateInput("GreaterThanOne", "Freq multiplier must be more than one", InfoMessageType.Error)]
-    public float noiseFrequencyMulti = 2;
-    // smaller than 1
-    [Range(0, 0.99f)]
-    public float noiseStrenthMulti = 0.5f;
+    //// larger than 1
+    //[ValidateInput("GreaterThanOne", "Freq multiplier must be more than one", InfoMessageType.Error)]
+    //public float noiseFrequencyMulti = 2;
+    //// smaller than 1
+    //[Range(0, 0.99f)]
+    //public float noiseStrenthMulti = 0.5f;
 
     [Title("Material")]
     //public Color earthAlbedoColor;
@@ -131,31 +132,47 @@ public class Earth : MonoBehaviour
     }
 
 
-    public float GetNoiseFactor(Vector3 pointOnUnitSphere)
-    {    
-
+    public float GetNoiseFactor(Vector3 pointOnUnitSphere, int index)
+    {
+        EarthNoise earthNoise = noiseArray[index];
         float factor = 0;
-        var layerFreq = noiseFrequency;
+        var layerFreq = earthNoise.noiseFrequency;
         var layerStrenth = 1.0f;
-        for (int i = 0; i < noiseMultiLayer; i++)
+        for (int i = 0; i < earthNoise.noiseMultiLayer; i++)
         {
-            var layerFactor = (noise.Evaluate(pointOnUnitSphere * layerFreq + noiseOffset) + 1) * 0.5f * layerStrenth;
+            var layerFactor = 0.0f;
+            if (index == 0)
+                layerFactor = (noise.Evaluate(pointOnUnitSphere * layerFreq + earthNoise.noiseOffset) + 1) * 0.5f * layerStrenth;
+            else
+            {
+                var decimalValue = 1 - Mathf.Abs(noise.Evaluate(pointOnUnitSphere * layerFreq + earthNoise.noiseOffset));
+                layerFactor = decimalValue * decimalValue  * layerStrenth;
+            }
+                
             factor += layerFactor;
-            layerFreq *= noiseFrequencyMulti;
-            layerStrenth *= noiseStrenthMulti;
+            layerFreq *= earthNoise.noiseFrequencyMulti;
+            layerStrenth *= earthNoise.noiseStrenthMulti;
         }
 
         // Make a threshould so that only value > threshould get shown
         // Others all keep 0
-        factor = Mathf.Max(0, factor - noiseThreshould);
+        factor = Mathf.Max(0, factor - earthNoise.noiseThreshould);
 
-
-        return  factor * noiseStrength;
+        return  factor * earthNoise.noiseStrength;
     }
 
     public Vector3 CalculatePointOnPlanet(Vector3 pointOnUnitSphere)
     {
-        float noiseFactor = GetNoiseFactor(pointOnUnitSphere);
+        float noiseFactor0 = GetNoiseFactor(pointOnUnitSphere, 0);
+        float noiseFactor = noiseFactor0;
+        //float noiseFactor = 0.001f;
+        if (noiseFactor0 > 0)
+        {
+            for (int i = 1; i < noiseArray.Length; i++)
+            {
+                noiseFactor += GetNoiseFactor(pointOnUnitSphere, i) * noiseFactor0;
+            }
+        }
 
         float overAllFactor = radius * (1 + noiseFactor);
 
@@ -163,8 +180,6 @@ public class Earth : MonoBehaviour
             maxFactor = overAllFactor;
         if (overAllFactor < minFactor)
             minFactor = overAllFactor;
-
-
 
         return pointOnUnitSphere * overAllFactor;
     }
