@@ -52,7 +52,6 @@ Shader "AfShaderBuilding"
 				UNITY_VERTEX_INPUT_INSTANCE_ID
 				UNITY_VERTEX_OUTPUT_STEREO
 				float4 ase_texcoord : TEXCOORD0;
-				float4 ase_texcoord1 : TEXCOORD1;
 			};
 
 			uniform sampler2D _MainTex;
@@ -66,7 +65,6 @@ Shader "AfShaderBuilding"
 				UNITY_TRANSFER_INSTANCE_ID(v, o);
 
 				o.ase_texcoord.xy = v.ase_texcoord.xy;
-				o.ase_texcoord1 = v.vertex;
 				
 				//setting value to unused interpolator channels and avoid initialization warnings
 				o.ase_texcoord.zw = 0;
@@ -86,10 +84,9 @@ Shader "AfShaderBuilding"
 				fixed4 finalColor;
 				float2 uv_MainTex = i.ase_texcoord.xy * _MainTex_ST.xy + _MainTex_ST.zw;
 				float4 tex2DNode2 = tex2D( _MainTex, uv_MainTex );
-				float4 appendResult6 = (float4(tex2DNode2.r , ( ( i.ase_texcoord1.xyz.y * 1.0 ) + tex2DNode2.g ) , tex2DNode2.b , 0.0));
 				
 				
-				finalColor = appendResult6;
+				finalColor = tex2DNode2;
 				return finalColor;
 			}
 			ENDCG
@@ -107,13 +104,13 @@ Node;AmplifyShaderEditor.SimpleMultiplyOpNode;5;-466.4474,1.110962;Float;False;2
 Node;AmplifyShaderEditor.SamplerNode;2;-670.33,-398.6647;Float;True;Property;_MainTex;MainTex;0;0;Create;True;0;0;False;0;None;8a79c365e0881cd4ab8ca9421db644b1;True;0;False;white;Auto;False;Object;-1;Auto;Texture2D;6;0;SAMPLER2D;;False;1;FLOAT2;0,0;False;2;FLOAT;0;False;3;FLOAT2;0,0;False;4;FLOAT2;0,0;False;5;FLOAT;1;False;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
 Node;AmplifyShaderEditor.SimpleAddOpNode;4;-285.1765,-4.911904;Float;False;2;2;0;FLOAT;0;False;1;FLOAT;0;False;1;FLOAT;0
 Node;AmplifyShaderEditor.DynamicAppendNode;6;-119.2541,-204.3816;Float;False;FLOAT4;4;0;FLOAT;0;False;1;FLOAT;0;False;2;FLOAT;0;False;3;FLOAT;0;False;1;FLOAT4;0
-Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;1;40.93996,-207.7049;Float;False;True;2;Float;ASEMaterialInspector;0;1;AfShaderBuilding;0770190933193b94aaa3065e307002fa;True;Unlit;0;0;Unlit;2;True;0;1;False;-1;0;False;-1;0;1;False;-1;0;False;-1;True;0;False;-1;0;False;-1;True;False;True;0;False;-1;True;True;True;True;True;0;False;-1;True;False;255;False;-1;255;False;-1;255;False;-1;7;False;-1;1;False;-1;1;False;-1;1;False;-1;7;False;-1;1;False;-1;1;False;-1;1;False;-1;True;1;False;-1;True;3;False;-1;True;True;0;False;-1;0;False;-1;True;1;RenderType=Opaque=RenderType;True;2;0;False;False;False;False;False;False;False;False;False;True;0;False;0;;0;0;Standard;1;Vertex Position,InvertActionOnDeselection;1;0;1;True;False;2;0;FLOAT4;0,0,0,0;False;1;FLOAT3;0,0,0;False;0
+Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;8;40.93996,-207.7049;Float;False;True;2;Float;ASEMaterialInspector;0;1;AfShaderBuilding;0770190933193b94aaa3065e307002fa;True;Unlit;0;0;Unlit;2;True;0;1;False;-1;0;False;-1;0;1;False;-1;0;False;-1;True;0;False;-1;0;False;-1;True;False;True;0;False;-1;True;True;True;True;True;0;False;-1;True;False;255;False;-1;255;False;-1;255;False;-1;7;False;-1;1;False;-1;1;False;-1;1;False;-1;7;False;-1;1;False;-1;1;False;-1;1;False;-1;True;1;False;-1;True;3;False;-1;True;True;0;False;-1;0;False;-1;True;1;RenderType=Opaque=RenderType;True;2;0;False;False;False;False;False;False;False;False;False;True;0;False;0;;0;0;Standard;1;Vertex Position,InvertActionOnDeselection;1;0;1;True;False;2;0;FLOAT4;0,0,0,0;False;1;FLOAT3;0,0,0;False;0
 WireConnection;5;0;3;2
 WireConnection;4;0;5;0
 WireConnection;4;1;2;2
 WireConnection;6;0;2;1
 WireConnection;6;1;4;0
 WireConnection;6;2;2;3
-WireConnection;1;0;6;0
+WireConnection;8;0;2;0
 ASEEND*/
-//CHKSM=6D93750FB1CEEBB51009A775D3E0E99ACB737836
+//CHKSM=2E75C21D07709A7CBC534F5F439D7B046136F885

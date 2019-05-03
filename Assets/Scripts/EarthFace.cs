@@ -49,6 +49,12 @@ public class EarthFace
                     triangles[triIndex + 5] = i + resolution + 1;
                     triIndex += 6;
                 }
+
+                if(x % earth.buildingSpan == earth.buildingSpan / 2 && y % earth.buildingSpan == earth.buildingSpan / 2)
+                {
+                    earth.GenearteBuilding(vertices[i]);
+                }
+
             }
         }
         mesh.Clear();
@@ -56,4 +62,5 @@ public class EarthFace
         mesh.triangles = triangles;
         mesh.RecalculateNormals();
     }
+    
 }

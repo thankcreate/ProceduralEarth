@@ -30,16 +30,21 @@ public class Earth : MonoBehaviour
     //[Range(0, 0.99f)]
     //public float noiseStrenthMulti = 0.5f;
 
-    [Title("Material")]
+    [Title("Earth Material")]
     //public Color earthAlbedoColor;
     public Material earthMaterial;
     public Gradient earthHeightColor;
     const int earthHeightColorResolution = 100;
-    Texture2D heightColorTex;
+    Texture2D heightColorTex;    
     
     float minFactor = float.MaxValue;
     float maxFactor = float.MinValue;
-    
+
+    [Title("Building Generation")]
+    public Transform buildingRoot;
+    public GameObject buildingPrefab;    
+    public int buildingSpan = 2;
+    List<GameObject> buildingList = new List<GameObject>();
 
     [SerializeField, HideInInspector]
     MeshFilter[] meshFilters;
@@ -49,7 +54,12 @@ public class Earth : MonoBehaviour
 
     private void OnValidate()
     {
-        Generate();
+        //Generate();
+        MakeHeightColorMapFromGradient();
+
+        //earthMaterial.SetTexture("_heightColorTexture", heightColorTex);
+        //earthMaterial.SetVector("_elevationMinMax", new Vector4(minFactor, maxFactor));
+        earthMaterial.SetTexture("_HeightColorTex", heightColorTex);
     }
 
     private void Generate()
@@ -63,6 +73,14 @@ public class Earth : MonoBehaviour
     {
         minFactor = float.MaxValue;
         maxFactor = float.MinValue;
+
+        for (int i = this.buildingRoot.childCount; i > 0; --i)
+            DestroyImmediate(this.buildingRoot.GetChild(0).gameObject);
+
+        if (buildingList == null)
+            buildingList = new List<GameObject>();
+        buildingList.Clear();
+
 
 
         if (meshFilters == null || meshFilters.Length == 0)
@@ -181,7 +199,24 @@ public class Earth : MonoBehaviour
         if (overAllFactor < minFactor)
             minFactor = overAllFactor;
 
-        return pointOnUnitSphere * overAllFactor;
+        var ret = pointOnUnitSphere * overAllFactor;
+       // GenearteBuilding(ret);
+        return ret;
+    }
+
+    public void GenearteBuilding(Vector3 terrainPosition)
+    {
+        if (terrainPosition.magnitude <= radius)
+        {
+            return;
+        }
+        var build = Instantiate(buildingPrefab, buildingRoot);
+        // buildingList.Add(build);
+
+        build.transform.localPosition = terrainPosition;
+        build.transform.rotation = Quaternion.FromToRotation(build.transform.up, terrainPosition);
+        build.GetComponent<Building>().Generate();
+        //build.
     }
 
     [Button]
@@ -204,4 +239,6 @@ public class Earth : MonoBehaviour
     {
         return property >= 1;
     }
+
+    
 }

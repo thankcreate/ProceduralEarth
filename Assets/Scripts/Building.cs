@@ -61,10 +61,11 @@ public class Building : MonoBehaviour
 
     private void OnValidate()
     {
-        Generate();
+        if (Application.isEditor)
+            Generate();
     }
 
-    void Generate()
+    public void Generate()
     {
         Initialize();
         GenerateMesh();
