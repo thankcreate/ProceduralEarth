@@ -194,6 +194,7 @@ public class Earth : MonoBehaviour
         float factor = 0;
         var layerFreq = earthNoise.noiseFrequency;
         var layerStrenth = 1.0f;
+        var lastLayerV = 1.0f; //only used in ridge generation
         for (int i = 0; i < earthNoise.noiseMultiLayer; i++)
         {
             var layerFactor = 0.0f;
@@ -202,7 +203,10 @@ public class Earth : MonoBehaviour
             else
             {
                 var decimalValue = 1 - Mathf.Abs(noise.Evaluate(pointOnUnitSphere * layerFreq + earthNoise.noiseOffset));
-                layerFactor = decimalValue * decimalValue  * layerStrenth;
+                var powed = Mathf.Pow(decimalValue, 2);
+                var multiplyByLastLayerV = powed * lastLayerV;
+                lastLayerV = multiplyByLastLayerV;
+                layerFactor = multiplyByLastLayerV * layerStrenth;
             }
                 
             factor += layerFactor;

@@ -104,12 +104,14 @@ public class Interations : MonoBehaviour
 
         if (Input.GetMouseButton(0))
         {
-            var ray = cam.ScreenPointToRay(Input.mousePosition);
-            RaycastHit hit;
-            if (Physics.Raycast(ray, out hit, 1000))
-            {
+            //var ray = cam.ScreenPointToRay(Input.mousePosition);
+            //RaycastHit hit;
+            //if (Physics.Raycast(ray, out hit, 1000) )
+            //{
+            //    return;
+            //}
+            if (Input.GetMouseButtonDown(0))
                 return;
-            }
 
             var deltaPosi = Input.mousePosition - lastMousePosi;
             var dragDis = rotateScale * deltaPosi;
@@ -272,7 +274,7 @@ public class Interations : MonoBehaviour
         var zeroToOneNoise = (Perlin.Noise(normX * freq + contourNoiseoffsetX,
             normY * freq + contourNoiseoffsetY) + 1) / 2;
 
-        Debug.Log("zeroToOneNoise: " + zeroToOneNoise);
+        // Debug.Log("zeroToOneNoise: " + zeroToOneNoise);
         var minHeight = allMinHeight;
         var maxHeight = allMaxHeight;
 
