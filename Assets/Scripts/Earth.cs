@@ -6,8 +6,11 @@ using UnityEngine;
 public class Earth : MonoBehaviour
 {
     [Title("Noise")]
+    [Range(0, 0.1f)]
+    public float overAllNoiseFactor = 1;
     public EarthNoise[] noiseArray;
     [Title("Shape")]
+    public Transform meshRoot;
     [Range(2, 256)]
     public int resolution = 10;
     [Range(1, 10)]
@@ -52,6 +55,35 @@ public class Earth : MonoBehaviour
 
     Noise noise = new Noise();
 
+    void Start()
+    {
+        GenerateColorTexture();
+        ReadMinMaxHeightFromMaterial();
+    }
+
+    public void GenerateColorTexture()
+    {
+        //Generate();
+        MakeHeightColorMapFromGradient();
+
+        //earthMaterial.SetTexture("_heightColorTexture", heightColorTex);
+        //earthMaterial.SetVector("_elevationMinMax", new Vector4(minFactor, maxFactor));
+        earthMaterial.SetTexture("_HeightColorTex", heightColorTex);
+
+
+    }
+
+    public Noise GetNoise()
+    {
+        return noise;
+    }
+
+    void ReadMinMaxHeightFromMaterial()
+    {
+        minFactor = earthMaterial.GetFloat("_Min");
+        maxFactor = earthMaterial.GetFloat("_Max");
+    }
+
     private void OnValidate()
     {
         //Generate();
@@ -62,11 +94,21 @@ public class Earth : MonoBehaviour
         earthMaterial.SetTexture("_HeightColorTex", heightColorTex);
     }
 
-    private void Generate()
+    public  void Generate()
     {
+        Debug.Log("OnValidateEarth");
         Initialize();
         GenerateMesh();
         GenerateColours();
+    }
+
+    public void ClearAllBuildings()
+    {
+        for (int i = this.buildingRoot.childCount; i > 0; --i)
+            DestroyImmediate(this.buildingRoot.GetChild(0).gameObject);
+
+
+        buildingList.Clear();
     }
 
     void Initialize()
@@ -74,12 +116,10 @@ public class Earth : MonoBehaviour
         minFactor = float.MaxValue;
         maxFactor = float.MinValue;
 
-        for (int i = this.buildingRoot.childCount; i > 0; --i)
-            DestroyImmediate(this.buildingRoot.GetChild(0).gameObject);
-
         if (buildingList == null)
             buildingList = new List<GameObject>();
-        buildingList.Clear();
+
+        ClearAllBuildings();
 
 
 
@@ -96,13 +136,17 @@ public class Earth : MonoBehaviour
             if (meshFilters[i] == null)
             {
                 GameObject meshObj = new GameObject("mesh");
-                meshObj.transform.parent = transform;
+                meshObj.transform.parent = meshRoot;
+                meshObj.transform.localPosition = Vector3.zero;
 
                 meshObj.AddComponent<MeshRenderer>();
                 meshFilters[i] = meshObj.AddComponent<MeshFilter>();
                 meshFilters[i].sharedMesh = new Mesh();
             }
-            meshFilters[i].GetComponent<MeshRenderer>().sharedMaterial = earthMaterial;
+            var mr = meshFilters[i].GetComponent<MeshRenderer>();
+            mr.sharedMaterial = earthMaterial;
+            mr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            mr.receiveShadows = false;
             terrainFaces[i] = new EarthFace(this, meshFilters[i].sharedMesh, resolution, directions[i]);
         }
     }
@@ -137,13 +181,7 @@ public class Earth : MonoBehaviour
 
     void GenerateColours()
     {
-        //Debug.Log("Min " + minFactor);
-        //Debug.Log("Max " + maxFactor);
-        MakeHeightColorMapFromGradient();
-
-        //earthMaterial.SetTexture("_heightColorTexture", heightColorTex);
-        //earthMaterial.SetVector("_elevationMinMax", new Vector4(minFactor, maxFactor));
-        earthMaterial.SetTexture("_HeightColorTex", heightColorTex);
+        GenerateColorTexture();
 
         earthMaterial.SetFloat("_Min", minFactor);
         earthMaterial.SetFloat("_Max", maxFactor);
@@ -179,11 +217,12 @@ public class Earth : MonoBehaviour
         return  factor * earthNoise.noiseStrength;
     }
 
-    public Vector3 CalculatePointOnPlanet(Vector3 pointOnUnitSphere)
+    public float CalculatePointFactorOnPlanet(Vector3 pointOnUnitSphere)
     {
         float noiseFactor0 = GetNoiseFactor(pointOnUnitSphere, 0);
-        float noiseFactor = noiseFactor0;
-        //float noiseFactor = 0.001f;
+
+        float noiseFactor = 0.0f;
+        noiseFactor += noiseFactor0;
         if (noiseFactor0 > 0)
         {
             for (int i = 1; i < noiseArray.Length; i++)
@@ -192,14 +231,21 @@ public class Earth : MonoBehaviour
             }
         }
 
-        float overAllFactor = radius * (1 + noiseFactor);
+        float overAllFactor = radius * (1 + noiseFactor * overAllNoiseFactor);
 
         if (overAllFactor > maxFactor)
             maxFactor = overAllFactor;
         if (overAllFactor < minFactor)
             minFactor = overAllFactor;
 
-        var ret = pointOnUnitSphere * overAllFactor;
+        var ret =  overAllFactor;
+        return ret;
+    }
+
+    public Vector3 CalculatePointOnPlanet(Vector3 pointOnUnitSphere)
+    {
+       
+        var ret = pointOnUnitSphere * CalculatePointFactorOnPlanet(pointOnUnitSphere);
        // GenearteBuilding(ret);
         return ret;
     }
@@ -240,5 +286,74 @@ public class Earth : MonoBehaviour
         return property >= 1;
     }
 
-    
+    public bool IsOnLand(Vector3 worldPosi)
+    {
+        var relativeHeight = GetRelativeHeight(worldPosi);
+        // Debug.Log("RelativeHeight: " + relativeHeight);
+        var landSep = earthHeightColor.colorKeys[1].time;
+
+        bool onLand = false;
+
+        if (relativeHeight > landSep)
+            onLand = true;
+        
+        return onLand;
+    }
+
+    float GetRelativeHeight(Vector3 worldPosi)
+    {
+        var localPosi = transform.InverseTransformPoint(worldPosi);
+        var unitLocalPosi = localPosi.normalized;
+
+        var factor = CalculatePointFactorOnPlanet(unitLocalPosi);
+        var lerp = Mathf.InverseLerp(minFactor, maxFactor, factor);
+        return lerp;
+    }
+
+
+
+    public Vector2 GetPolarPosiFromWorld(Vector3 worldPosi)
+    {
+        var point = transform.InverseTransformPoint(worldPosi).normalized;
+
+        return GetPolarPosiFromLocal(point);
+    }
+
+
+    public Vector2 GetPolarPosiFromLocal(Vector3 point)
+    {
+        Vector2 ret = Vector2.zero;
+        
+
+        ret.y = Mathf.Atan2(point.x, point.z);
+        var xzLen = new Vector2(point.x, point.z).magnitude;
+        ret.x = Mathf.Atan2(-point.y, xzLen);
+
+        ret *= Mathf.Rad2Deg;
+        return ret;
+    }
+
+    public Vector3 GetLocalPosiFromPolar(Vector2 polar)
+    {
+        Vector3 ret = Vector3.zero;
+
+        var origin = new Vector3(0, 0, 1);
+        var rotation = Quaternion.Euler(polar.x, polar.y, 0);
+        ret = rotation * origin;
+        return ret;
+    }
+
+    public Vector3 GetWorldPosiFromPolar(Vector2 polar)
+    {
+        var localPosi = GetLocalPosiFromPolar(polar);
+        return transform.TransformPoint(localPosi);
+    }
+
+    public Vector3 GetWorldTerrainPosiFromPoloar(Vector2 polar)
+    {
+        var localPosi = GetLocalPosiFromPolar(polar).normalized;
+        var localTerrainPosi = CalculatePointOnPlanet(localPosi);
+        var worldTerrainPosi = transform.TransformPoint(localTerrainPosi);
+        return worldTerrainPosi;
+    }
 }

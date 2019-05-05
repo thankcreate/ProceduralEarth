@@ -111,7 +111,7 @@ public class BuildingHighLevel : Building
             var stepAngle = Mathf.PI * 2 / shapeEdgeCount;
             angle += stepAngle;            
             bf.baseShape[i] = new Vector2(unit * Mathf.Cos(angle), unit * Mathf.Sin(angle));
-            Debug.Log(bf.baseShape[i]);
+            // Debug.Log(bf.baseShape[i]);
         }
 
         return bf;

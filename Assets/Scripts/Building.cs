@@ -61,6 +61,7 @@ public class Building : MonoBehaviour
 
     private void OnValidate()
     {
+        //Debug.Log("OnValidateBuilding");
         if (Application.isEditor)
             Generate();
     }
