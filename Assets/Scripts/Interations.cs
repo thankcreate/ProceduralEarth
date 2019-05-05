@@ -113,11 +113,20 @@ public class Interations : MonoBehaviour
 
             var deltaPosi = Input.mousePosition - lastMousePosi;
             var dragDis = rotateScale * deltaPosi;
-            var camParent = cam.transform.parent;
-            var rt = camParent.localEulerAngles;
+            var camRootX = cam.transform.parent;
+            var rt = camRootX.localEulerAngles;
+            rt.x += -dragDis.y;
+            if(rt.x > 180)
+            {
+                rt.x = rt.x - 360;
+            }
+            rt.x = Mathf.Clamp(rt.x, -89.0f, 89.0f);
+            camRootX.localEulerAngles = rt;
+
+            var camRootY = cam.transform.parent.parent;
+            rt = camRootY.localEulerAngles;
             rt.y += dragDis.x;
-            rt.x += dragDis.y;
-            camParent.localEulerAngles = rt;
+            camRootY.localEulerAngles = rt;
         }
     }
 
