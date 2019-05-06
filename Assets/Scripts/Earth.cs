@@ -37,6 +37,10 @@ public class Earth : MonoBehaviour
     //public Color earthAlbedoColor;
     public Material earthMaterial;
     public Gradient earthHeightColor;
+    public bool pureRandomColor;
+    public float hueInterval = 0.1f;
+    public bool pureRandomTime;
+
     const int earthHeightColorResolution = 100;
     Texture2D heightColorTex;    
     
@@ -54,8 +58,25 @@ public class Earth : MonoBehaviour
 
     void Start()
     {
+        SaveOriginalGradientColor();
         GenerateColorTexture();
         ReadMinMaxHeightFromMaterial();
+    }
+
+    List<GradientColorKey> originalColorList;
+
+    public void SaveOriginalGradientColor()
+    {
+        originalColorList = new List<GradientColorKey>();
+        foreach (var c in earthHeightColor.colorKeys)
+        {
+            originalColorList.Add(c);
+        }
+    }
+
+    public void RestoreToOriginalGradientColor()
+    {        
+        earthHeightColor.SetKeys(originalColorList.ToArray(), earthHeightColor.alphaKeys);
     }
 
     public void GenerateColorTexture()
@@ -331,6 +352,8 @@ public class Earth : MonoBehaviour
         var localPosi = GetLocalPosiFromPolar(polar);
         return transform.TransformPoint(localPosi);
     }
+
+    
 
     public Vector3 GetWorldTerrainPosiFromPoloar(Vector2 polar)
     {

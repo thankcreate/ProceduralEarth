@@ -15,10 +15,12 @@ public class Interations : MonoBehaviour
     public Transform camEarthAnchor;
     public float scrollScale = 1;
     public float rotateScale = 1;
+    public float dragScale = 0.1f;
     public float mvScale = 0.1f;
 
     [Title("City Generation")]
     public GameObject[] buildingPrefabs;
+    public bool sameDirEveryClick = true;
     public float magicFactor = 1.1f;
     public float cityGenInterval = 0.5f;
     public float heightGrowLerp = 3.0f;
@@ -137,7 +139,14 @@ public class Interations : MonoBehaviour
         if(Input.GetKeyDown(KeyCode.C))
         {
             ClearAllBuildings();
+            if(cor != null)
+            {                
+                StopCoroutine(cor);                
+                inGeneration = false;
+            }
         }
+
+        
     }
 
     Vector3 lastMousePosi;
@@ -209,6 +218,16 @@ public class Interations : MonoBehaviour
             rt.y += dragDis.x;
             camRootY.localEulerAngles = rt;
         }
+
+        // Drag logic
+        if (Input.GetMouseButton(2))
+        {
+            var deltaPosi = Input.mousePosition - lastMousePosi;
+
+            lp = cam.transform.localPosition;
+            lp += dragScale * deltaPosi * -1;
+            cam.transform.localPosition = lp;
+        }
     }
 
     void CheckIfMouseClicked()
@@ -220,6 +239,8 @@ public class Interations : MonoBehaviour
     }
 
     bool inGeneration = false;
+    Coroutine cor;
+    IEnumerator lastEu;
     private void HandleMouseDown()
     {
         var ray = cam.ScreenPointToRay(Input.mousePosition);
@@ -233,7 +254,8 @@ public class Interations : MonoBehaviour
                 if (onLand && !inGeneration)
                 {
                     inGeneration = true;
-                    StartCoroutine(GenerateCity(hitPoint));
+                    var localHitPoint = transform.InverseTransformPoint(hitPoint);                    
+                    cor =  StartCoroutine(GenerateCity(localHitPoint));                    
                 }
                     
                 
@@ -242,25 +264,25 @@ public class Interations : MonoBehaviour
     }
 
     int counter = 0;
-    IEnumerator GenerateCity(Vector3 hitPoint)
+    IEnumerator GenerateCity(Vector3 localHitPoint)
     {
+
         PreCalc();
 
         counter = 0;
         Debug.Log("GenerateCity Begin");
-
-
+        
 
         for (int i = 0; i < extendPerClick; i++)
         {
+            var hitPoint = transform.TransformPoint(localHitPoint);
             bool atLeastOneGenerated = false;
             if (i == 0)
             {
                 bool res = GenerateBuilding(0, 0, hitPoint);
                 if (res)
                     atLeastOneGenerated = true;
-            }
-                
+            }                
 
             int left = -i;
             int right = i;
@@ -335,7 +357,8 @@ public class Interations : MonoBehaviour
 
         //var radialDir = worldBuilding - transform.position;
         //var worldDir = Quaternion.FromToRotation(Vector3.up, radialDir);
-        var buildingEular = new Vector3(90 + polarHitPoint.x, polarHitPoint.y, 0);
+        Vector2 usedPolar = sameDirEveryClick ? polarHitPoint : polarBuilding;
+        var buildingEular = new Vector3(90 + usedPolar.x, usedPolar.y, 0);
         
 
         var onLand = currentPlanet.IsOnLand(worldBuilding);
@@ -479,27 +502,58 @@ public class Interations : MonoBehaviour
         {
             ChangeCurrentPlanet();
         }
-    }
+    }   
 
     void ChangeCurrentPlanet()
     {
         if (currentPlanet == null)
             return;
 
-        var colorKeys = currentPlanet.earthHeightColor.colorKeys;
-        for(int i = 0; i < colorKeys.Length; i++)
+        // color
+        if (!currentPlanet.pureRandomTime)
         {
-            colorKeys[i].color = Random.ColorHSV();
-            // colorKeys[i].time = Random.value;            
+            currentPlanet.RestoreToOriginalGradientColor();
         }
 
+        var colorKeys = currentPlanet.earthHeightColor.colorKeys;
+        var baseRandom = Random.value;
+        for(int i = 0; i < colorKeys.Length; i++)
+        {
+            var hue = baseRandom + i * currentPlanet.hueInterval;
+            var color = Color.white;
+
+            if(currentPlanet.pureRandomColor)
+            {
+                color = Random.ColorHSV();
+            }
+            else
+            {
+                color = Color.HSVToRGB(hue, 0.5f, 0.5f);
+            }
+
+            Debug.Log("HUES: " + hue);
+
+            colorKeys[i].color = color;
+
+            if(currentPlanet.pureRandomTime)
+            {
+                colorKeys[i].time = Random.value;
+            }   
+        }
+
+        // basic layer
         var layer0 = currentPlanet.noiseArray[0];
-        layer0.noiseFrequency = Random.Range(0.3f, 3);
+        layer0.noiseFrequency = Random.Range(0.8f, 1.5f);
         layer0.noiseOffset = new Vector3(Random.value, Random.value, Random.value) * 10;
         layer0.noiseThreshould = 0;
         //layer0.noiseThreshould = Random.Range(0.0f, 0.8f);
 
 
+        // ridge layer
+        var layer1 = currentPlanet.noiseArray[1];
+        layer1.noiseFrequency = Random.Range(1.6f, 2.0f);
+        layer1.noiseOffset = new Vector3(Random.value, Random.value, Random.value) * 10;
+        layer1.noiseMultiLayer = Random.Range(1, 3);
 
         currentPlanet.earthHeightColor.SetKeys(colorKeys, currentPlanet.earthHeightColor.alphaKeys);
         currentPlanet.Generate();
