@@ -1,10 +1,13 @@
 ﻿using Sirenix.OdinInspector;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor.Presets;
 using UnityEngine;
 
 public class Earth : MonoBehaviour
 {
+    [Title("Preset")]
+    public Preset earthPreset;
     [Title("Noise")]
     [Range(0, 0.1f)]
     public float overAllNoiseFactor = 1;
@@ -124,6 +127,15 @@ public class Earth : MonoBehaviour
     {
         for (int i = this.buildingRoot.childCount; i > 0; --i)
             DestroyImmediate(this.buildingRoot.GetChild(0).gameObject);
+    }
+
+    public void DestroyAllMeshes()
+    {
+        for (int i = this.meshRoot.childCount; i > 0; --i)
+            DestroyImmediate(this.meshRoot.GetChild(0).gameObject);
+
+        for (int i = 0; i < meshFilters.Length; i++)
+            meshFilters[i] = null;
 
     }
 
@@ -134,7 +146,7 @@ public class Earth : MonoBehaviour
 
 
         ClearAllBuildings();
-
+        DestroyAllMeshes();
 
 
         if (meshFilters == null || meshFilters.Length == 0)
@@ -145,9 +157,10 @@ public class Earth : MonoBehaviour
 
         Vector3[] directions = { Vector3.up, Vector3.down, Vector3.left, Vector3.right, Vector3.forward, Vector3.back };
 
+
         for (int i = 0; i < 6; i++)
         {
-            if (meshFilters[i] == null)
+            if (meshFilters[i] == null || meshRoot.childCount == 0)
             {
                 GameObject meshObj = new GameObject("mesh");
                 meshObj.transform.parent = meshRoot;
@@ -361,5 +374,10 @@ public class Earth : MonoBehaviour
         var localTerrainPosi = CalculatePointOnPlanet(localPosi);
         var worldTerrainPosi = transform.TransformPoint(localTerrainPosi);
         return worldTerrainPosi;
+    }
+
+    public void ApplyEarthPresetBack()
+    {
+        earthPreset.ApplyTo(this);
     }
 }

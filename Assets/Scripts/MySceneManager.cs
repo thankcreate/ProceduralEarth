@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class MySceneManager : MonoBehaviour
 {
@@ -12,7 +13,9 @@ public class MySceneManager : MonoBehaviour
     Quaternion defaultCamRot;
 
     Earth curPlanet;
-    
+
+    public GameObject orbtis;
+    public Text title;
     public float camBackDt = 1.5f;
     // Start is called before the first frame update
     void Start()
@@ -23,7 +26,7 @@ public class MySceneManager : MonoBehaviour
         defaultCamParent = cam.transform.parent;
         defaultCamPosi = cam.transform.position;
         defaultCamRot = cam.transform.rotation;
-        
+        SetTitle("");
     }
 
     // Update is called once per frame
@@ -48,6 +51,8 @@ public class MySceneManager : MonoBehaviour
             curPlanet.transform.parent.gameObject.MySendEventToAll("RESUME_ROTATE");
             curPlanet = null;
 
+            orbtis.SetActive(true);
+            SetTitle("");
         }
     }
 
@@ -58,6 +63,9 @@ public class MySceneManager : MonoBehaviour
         curPlanet = pl;
     }
 
-
+    public void SetTitle(string val)
+    {
+        title.text = val;
+    }
 
 }

@@ -34,6 +34,7 @@ public class Interations : MonoBehaviour
     public float cbdProportion = 1f;
 
     [Title("Central Park")]
+    public bool needCentralPark = true;
     public Vector2 centralParkSize = new Vector2(0.2f, 0.03f);
 
     [Title("City Height")]
@@ -136,6 +137,7 @@ public class Interations : MonoBehaviour
         lastMousePosi = Input.mousePosition;
     }
 
+    
     private void CheckOtherKeys()
     {
         if(Input.GetKeyDown(KeyCode.C))
@@ -150,7 +152,8 @@ public class Interations : MonoBehaviour
 
         if(Input.GetKeyDown(KeyCode.E))
         {
-
+            currentPlanet.ApplyEarthPresetBack();
+            currentPlanet.Generate();
         }
     }
 
@@ -489,6 +492,9 @@ public class Interations : MonoBehaviour
     Vector2 centralParkMax;
     bool IsInCentralPark(int polarX, int polarY)
     {
+        if (!needCentralPark)
+            return false;
+
         var normX = 1.0f * polarX / extendPerClick;
         var normY = 1.0f * polarY / extendPerClick;
         if (normX > centralParkMin.x 
@@ -559,6 +565,7 @@ public class Interations : MonoBehaviour
         layer1.noiseFrequency = Random.Range(1.6f, 2.0f);
         layer1.noiseOffset = new Vector3(Random.value, Random.value, Random.value) * 10;
         layer1.noiseMultiLayer = Random.Range(1, 3);
+        layer1.noiseStrength = Random.Range(0.1f, 0.2f);
 
         currentPlanet.earthHeightColor.SetKeys(colorKeys, currentPlanet.earthHeightColor.alphaKeys);
         currentPlanet.Generate();
@@ -573,6 +580,8 @@ public class Interations : MonoBehaviour
     
     public void ReportSelfClicked()
     {
+        manager.orbtis.SetActive(false);
         manager.SetCurPlanet(GetComponent<Earth>());
+        manager.SetTitle(gameObject.name);
     }
 }
