@@ -55,9 +55,11 @@ public class Interations : MonoBehaviour
 
     Vector2[] cbdPositions;
     int buildingCount = 80;
+    MySceneManager manager;
     // Start is called before the first frame update
     void Start()
     {
+        manager = FindObjectOfType<MySceneManager>();
         currentPlanet = GetComponent<Earth>();
         cam = Camera.main;
         PreCalc();
@@ -146,7 +148,10 @@ public class Interations : MonoBehaviour
             }
         }
 
-        
+        if(Input.GetKeyDown(KeyCode.E))
+        {
+
+        }
     }
 
     Vector3 lastMousePosi;
@@ -563,5 +568,11 @@ public class Interations : MonoBehaviour
     public void ClearAllBuildings()
     {
         currentPlanet.ClearAllBuildings();
+    }
+
+    
+    public void ReportSelfClicked()
+    {
+        manager.SetCurPlanet(GetComponent<Earth>());
     }
 }
