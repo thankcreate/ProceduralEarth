@@ -15,7 +15,7 @@ public class Interations : MonoBehaviour
     public float rotateScale = 1;
 
     [Title("City Generation")]
-    public GameObject testPrefab;
+    public GameObject[] buildingPrefabs;
     public float magicFactor = 1.1f;
     public float cityGenInterval = 0.5f;
     public float degreePerClick = 8;
@@ -57,7 +57,7 @@ public class Interations : MonoBehaviour
 
     void PreCalc()
     {       
-        var boundsSize = testPrefab.transform.localScale.x * 2 * magicFactor;
+        var boundsSize = buildingPrefabs[0].transform.localScale.x * 2 * magicFactor;
         buildingCount = (int)(2 * Mathf.PI / boundsSize);
 
         extendPerClick = (int)(degreePerClick / 360 * buildingCount);
@@ -148,7 +148,7 @@ public class Interations : MonoBehaviour
         if(Physics.Raycast(ray, out hit, 1000))
         {
             var hitPoint = hit.point;
-            if(testPrefab)
+            if(buildingPrefabs[0])
             {                
                 var onLand = currentPlanet.IsOnLand(hitPoint);
                 if (onLand && !inGeneration)
@@ -254,14 +254,31 @@ public class Interations : MonoBehaviour
         var onLand = currentPlanet.IsOnLand(worldBuilding);
         if (onLand)
         {
-            var building = Instantiate(testPrefab, worldBuilding, Quaternion.identity , currentPlanet.buildingRoot);
+            var prefab = buildingPrefabs[Random.Range(0, buildingPrefabs.Length)];
+            var building = Instantiate(prefab, worldBuilding, Quaternion.identity , currentPlanet.buildingRoot);
+            building.SetActive(true);
             building.transform.localEulerAngles = buildingEular;
             var ls = building.transform.localScale;
-            ls.y *= GetHeightFactorOverall(polarX, polarY) * GetHeightFactorRadial(polarX, polarY);
+            ls.y *= GetHeightMultiplier(building, polarX, polarY);
             building.transform.localScale = ls;
 
         }
         return onLand;
+    }
+
+    const int STANDARD_HEIGHT = 14;
+    float GetHeightMultiplier(GameObject go, int polarX, int polarY)
+    {
+        var ret = GetHeightFactorOverall(polarX, polarY) * GetHeightFactorRadial(polarX, polarY);
+        var script = go.transform.GetChild(0).GetComponent<BuildingHighLevel>();
+        var floorSum = 0;
+        foreach(var section in script.sectionFloors)
+        {
+            floorSum += section;
+        }
+
+        ret /= 1.0f * floorSum / STANDARD_HEIGHT;
+        return ret;
     }
 
     float GetHeightFactorOverall(int polarX, int polarY)

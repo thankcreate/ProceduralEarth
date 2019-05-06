@@ -45,9 +45,6 @@ public class Earth : MonoBehaviour
 
     [Title("Building Generation")]
     public Transform buildingRoot;
-    public GameObject buildingPrefab;    
-    public int buildingSpan = 2;
-    List<GameObject> buildingList = new List<GameObject>();
 
     [SerializeField, HideInInspector]
     MeshFilter[] meshFilters;
@@ -107,8 +104,6 @@ public class Earth : MonoBehaviour
         for (int i = this.buildingRoot.childCount; i > 0; --i)
             DestroyImmediate(this.buildingRoot.GetChild(0).gameObject);
 
-
-        buildingList.Clear();
     }
 
     void Initialize()
@@ -116,8 +111,6 @@ public class Earth : MonoBehaviour
         minFactor = float.MaxValue;
         maxFactor = float.MinValue;
 
-        if (buildingList == null)
-            buildingList = new List<GameObject>();
 
         ClearAllBuildings();
 
@@ -254,20 +247,6 @@ public class Earth : MonoBehaviour
         return ret;
     }
 
-    public void GenearteBuilding(Vector3 terrainPosition)
-    {
-        if (terrainPosition.magnitude <= radius)
-        {
-            return;
-        }
-        var build = Instantiate(buildingPrefab, buildingRoot);
-        // buildingList.Add(build);
-
-        build.transform.localPosition = terrainPosition;
-        build.transform.rotation = Quaternion.FromToRotation(build.transform.up, terrainPosition);
-        build.GetComponent<Building>().Generate();
-        //build.
-    }
 
     [Button]
     public void Refresh()

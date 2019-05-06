@@ -50,10 +50,10 @@ public class EarthFace
                     triIndex += 6;
                 }
 
-                if(x % earth.buildingSpan == earth.buildingSpan / 2 && y % earth.buildingSpan == earth.buildingSpan / 2)
-                {
-                    earth.GenearteBuilding(vertices[i]);
-                }
+                //if(x % earth.buildingSpan == earth.buildingSpan / 2 && y % earth.buildingSpan == earth.buildingSpan / 2)
+                //{
+                //    earth.GenearteBuilding(vertices[i]);
+                //}
 
             }
         }
