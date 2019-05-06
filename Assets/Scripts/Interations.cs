@@ -7,23 +7,29 @@ public class Interations : MonoBehaviour
 {
     Earth currentPlanet;
     Camera cam;
-    
-    
+
 
     [Title("Camera Control")]
+    public Transform rootY;
+    public Transform rootX;
+    public Transform camEarthAnchor;
     public float scrollScale = 1;
     public float rotateScale = 1;
+    public float mvScale = 0.1f;
 
     [Title("City Generation")]
     public GameObject[] buildingPrefabs;
     public float magicFactor = 1.1f;
     public float cityGenInterval = 0.5f;
+    public float heightGrowLerp = 3.0f;
     public float degreePerClick = 8;
     public float contourFre = 1;
     public int verticalBlock = 2;
     public int horizontalBlock = 6;
     public float roadWidthFactor = 0.1f;
     int extendPerClick = 3;
+    public int cbdNumber = 1;
+    public float cbdProportion = 1f;
 
     [Title("Central Park")]
     public Vector2 centralParkSize = new Vector2(0.2f, 0.03f);
@@ -45,7 +51,7 @@ public class Interations : MonoBehaviour
     public float middleMinHeight = 1f;
     public float middleExp = 1;
 
-
+    Vector2[] cbdPositions;
     int buildingCount = 80;
     // Start is called before the first frame update
     void Start()
@@ -53,7 +59,27 @@ public class Interations : MonoBehaviour
         currentPlanet = GetComponent<Earth>();
         cam = Camera.main;
         PreCalc();
+        SaveOriginalInfo();
     }
+
+
+    Vector3 oriRootYRot;
+    Vector3 oriRootXRot;
+    Vector3 oriEarthCamPosi;
+    void SaveOriginalInfo()
+    {
+        oriRootXRot = rootX.localEulerAngles;
+        oriRootYRot = rootY.localEulerAngles;
+        oriEarthCamPosi = camEarthAnchor.localPosition;
+    }
+
+    void RestoreOriginalInfo()
+    {
+        rootX.localEulerAngles = oriRootXRot;
+        rootY.localEulerAngles = oriRootYRot;
+        cam.transform.localPosition = oriEarthCamPosi;
+    }
+
 
     void PreCalc()
     {       
@@ -62,17 +88,35 @@ public class Interations : MonoBehaviour
 
         extendPerClick = (int)(degreePerClick / 360 * buildingCount);
 
+        Debug.Log("extendPerClick: " + extendPerClick);
+
         contourNoiseoffsetX = Random.Range(0f, 10f);
         contourNoiseoffsetY = Random.Range(0f, 10f);
 
         float parkMinimumEdge = 0.2f;
         //centralParkMin.x = Random.Range(parkMinimumEdge, 1 - centralParkSize.x - parkMinimumEdge);
         //centralParkMin.y = Random.Range(parkMinimumEdge, 1 - centralParkSize.y - parkMinimumEdge);
-        centralParkMin.x = Random.Range(-middleProportion, middleProportion - centralParkSize.x);
-        centralParkMin.y = Random.Range(-middleProportion, middleProportion - centralParkSize.y);
-        centralParkMax.x = centralParkMin.x + centralParkSize.x;
-        centralParkMax.y = centralParkMin.y + centralParkSize.y;
 
+        var magOfStandardSize = degreePerClick / 25;
+        var adjustedCentralParkSize = centralParkSize / magOfStandardSize;
+
+        centralParkMin.x = Random.Range(-middleProportion, middleProportion - adjustedCentralParkSize.x);
+        centralParkMin.y = Random.Range(-middleProportion, middleProportion - adjustedCentralParkSize.y);
+        centralParkMax.x = centralParkMin.x + adjustedCentralParkSize.x;
+        centralParkMax.y = centralParkMin.y + adjustedCentralParkSize.y;
+
+        cbdPositions = new Vector2[cbdNumber];
+        if(cbdNumber == 1)
+        {
+            cbdPositions[0] = Vector2.zero;
+        }
+        else
+        {
+            for(int i = 0; i < cbdNumber; i++)
+            {
+                cbdPositions[i] = new Vector2(Random.Range(-cbdProportion, cbdProportion), Random.Range(-cbdProportion, cbdProportion));
+            }
+        }
     }
 
     // Update is called once per frame
@@ -83,9 +127,17 @@ public class Interations : MonoBehaviour
         CheckIfMouseClicked();
 
         CamControl();
-
+        CheckOtherKeys();
 
         lastMousePosi = Input.mousePosition;
+    }
+
+    private void CheckOtherKeys()
+    {
+        if(Input.GetKeyDown(KeyCode.C))
+        {
+            ClearAllBuildings();
+        }
     }
 
     Vector3 lastMousePosi;
@@ -101,6 +153,33 @@ public class Interations : MonoBehaviour
         var lp = cam.transform.localPosition;
         lp += scrollDis * localForward;
         cam.transform.localPosition = lp;
+
+        Vector3 arrow = Vector3.zero;
+        if (Input.GetKey(KeyCode.DownArrow))
+            arrow.y = -1;
+        else if (Input.GetKey(KeyCode.UpArrow))
+            arrow.y = 1;
+        else if (Input.GetKey(KeyCode.LeftArrow))
+            arrow.x = -1;
+        else if (Input.GetKey(KeyCode.RightArrow))
+            arrow.x = 1;
+
+        if(arrow != Vector3.zero)
+        {
+            lp = cam.transform.localPosition;
+            lp += arrow * mvScale * Time.deltaTime;
+            cam.transform.localPosition = lp;
+
+            //var camRootX = cam.transform.parent;
+            //var camRootXLp = camRootX.localPosition;
+            //camRootXLp += arrow * mvScale * Time.deltaTime;
+            //camRootX.localPosition = camRootXLp;
+        }
+
+        if(Input.GetKeyDown(KeyCode.R))
+        {
+            RestoreOriginalInfo();
+        }
 
         if (Input.GetMouseButton(0))
         {
@@ -162,9 +241,15 @@ public class Interations : MonoBehaviour
         }
     }
 
+    int counter = 0;
     IEnumerator GenerateCity(Vector3 hitPoint)
     {
         PreCalc();
+
+        counter = 0;
+        Debug.Log("GenerateCity Begin");
+
+
 
         for (int i = 0; i < extendPerClick; i++)
         {
@@ -212,11 +297,13 @@ public class Interations : MonoBehaviour
                 yield return new WaitForSeconds(cityGenInterval);
             else
             {
+                Debug.Log("Reach limit at i: " + i);
                 break;
             }
 
         }
 
+        Debug.Log("GenerateCity End: " + counter + "buildings generated");
         inGeneration = false;
         yield return null;
     }
@@ -258,10 +345,14 @@ public class Interations : MonoBehaviour
             var building = Instantiate(prefab, worldBuilding, Quaternion.identity , currentPlanet.buildingRoot);
             building.SetActive(true);
             building.transform.localEulerAngles = buildingEular;
-            var ls = building.transform.localScale;
-            ls.y *= GetHeightMultiplier(building, polarX, polarY);
-            building.transform.localScale = ls;
 
+            var bw = building.GetComponent<BuildingWrapper>();
+            if(bw)
+            {
+                var ls = building.transform.localScale;
+                bw.ScaleToY(ls.y * GetHeightMultiplier(building, polarX, polarY), heightGrowLerp);
+            }
+            counter++;
         }
         return onLand;
     }
@@ -305,7 +396,14 @@ public class Interations : MonoBehaviour
 
         var normX = 1.0f * polarX / extendPerClick;
         var normY = 1.0f * polarY / extendPerClick;
-        var distance = new Vector2(normX, normY).magnitude;
+        var normPosi = new Vector2(polarX, polarY) * 1.0f / extendPerClick;
+        float minDistance = float.MaxValue;
+        foreach(var cbdPosi in cbdPositions)
+        {
+            var dis = Vector2.Distance(cbdPosi, normPosi);
+            minDistance = Mathf.Min(minDistance, dis);
+        }
+        var distance = minDistance;
 
 
         if (distance < centerProportion)
