@@ -2218,6 +2218,7 @@ MonoBehaviour:
   roadWidthFactor: 0.5
   cbdNumber: 3
   cbdProportion: 0.5
+  needCentralPark: 1
   centralParkSize: {x: 0.1, y: 0.4}
   allHeightFreq: 15
   allMaxHeight: 6

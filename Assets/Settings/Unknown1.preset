@@ -28,8 +28,7 @@ Preset:
   - target: {fileID: 0}
     propertyPath: earthPreset
     value: 
-    objectReference: {fileID: 2655988077585873504, guid: 437719fa2ba7b3f4aa7c16d932bff658,
-      type: 2}
+    objectReference: {fileID: 2655988077585873504}
   - target: {fileID: 0}
     propertyPath: overAllNoiseFactor
     value: 0.03
@@ -116,7 +115,7 @@ Preset:
     objectReference: {fileID: 0}
   - target: {fileID: 0}
     propertyPath: resolution
-    value: 256
+    value: 255
     objectReference: {fileID: 0}
   - target: {fileID: 0}
     propertyPath: radius

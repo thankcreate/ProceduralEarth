@@ -28,7 +28,7 @@ Preset:
   - target: {fileID: 0}
     propertyPath: earthPreset
     value: 
-    objectReference: {fileID: 0}
+    objectReference: {fileID: 2655988077585873504}
   - target: {fileID: 0}
     propertyPath: overAllNoiseFactor
     value: 0.01
@@ -115,7 +115,7 @@ Preset:
     objectReference: {fileID: 0}
   - target: {fileID: 0}
     propertyPath: resolution
-    value: 256
+    value: 255
     objectReference: {fileID: 0}
   - target: {fileID: 0}
     propertyPath: radius
@@ -127,15 +127,15 @@ Preset:
     objectReference: {fileID: 2100000, guid: c895b445aacdbc34792c12aa7c333158, type: 2}
   - target: {fileID: 0}
     propertyPath: earthHeightColor.key0.r
-    value: 0.9433962
+    value: 0.066037714
     objectReference: {fileID: 0}
   - target: {fileID: 0}
     propertyPath: earthHeightColor.key0.g
-    value: 0.352364
+    value: 0.008254714
     objectReference: {fileID: 0}
   - target: {fileID: 0}
     propertyPath: earthHeightColor.key0.b
-    value: 0.27144888
+    value: 0
     objectReference: {fileID: 0}
   - target: {fileID: 0}
     propertyPath: earthHeightColor.key0.a
@@ -159,15 +159,15 @@ Preset:
     objectReference: {fileID: 0}
   - target: {fileID: 0}
     propertyPath: earthHeightColor.key2.r
-    value: 0.8301887
+    value: 1
     objectReference: {fileID: 0}
   - target: {fileID: 0}
     propertyPath: earthHeightColor.key2.g
-    value: 0.50169533
+    value: 0.35993457
     objectReference: {fileID: 0}
   - target: {fileID: 0}
     propertyPath: earthHeightColor.key2.b
-    value: 0.36418653
+    value: 0.13679248
     objectReference: {fileID: 0}
   - target: {fileID: 0}
     propertyPath: earthHeightColor.key2.a
@@ -259,15 +259,15 @@ Preset:
     objectReference: {fileID: 0}
   - target: {fileID: 0}
     propertyPath: earthHeightColor.ctime1
-    value: 38743
+    value: 22252
     objectReference: {fileID: 0}
   - target: {fileID: 0}
     propertyPath: earthHeightColor.ctime2
-    value: 64186
+    value: 44097
     objectReference: {fileID: 0}
   - target: {fileID: 0}
     propertyPath: earthHeightColor.ctime3
-    value: 65535
+    value: 64186
     objectReference: {fileID: 0}
   - target: {fileID: 0}
     propertyPath: earthHeightColor.ctime4
@@ -323,7 +323,7 @@ Preset:
     objectReference: {fileID: 0}
   - target: {fileID: 0}
     propertyPath: earthHeightColor.m_NumColorKeys
-    value: 3
+    value: 4
     objectReference: {fileID: 0}
   - target: {fileID: 0}
     propertyPath: earthHeightColor.m_NumAlphaKeys

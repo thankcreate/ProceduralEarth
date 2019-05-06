@@ -26,6 +26,10 @@ Preset:
     value: 
     objectReference: {fileID: 0}
   - target: {fileID: 0}
+    propertyPath: earthPreset
+    value: 
+    objectReference: {fileID: 2655988077585873504}
+  - target: {fileID: 0}
     propertyPath: overAllNoiseFactor
     value: 0.03
     objectReference: {fileID: 0}
