@@ -154,6 +154,7 @@ public class Interations : MonoBehaviour
         {
             currentPlanet.ApplyEarthPresetBack();
             currentPlanet.Generate();
+            manager.SetTitle(gameObject.name);
         }
     }
 
@@ -554,7 +555,7 @@ public class Interations : MonoBehaviour
 
         // basic layer
         var layer0 = currentPlanet.noiseArray[0];
-        layer0.noiseFrequency = Random.Range(0.8f, 1.5f);
+        layer0.noiseFrequency = Random.Range(0.8f, 2.5f);
         layer0.noiseOffset = new Vector3(Random.value, Random.value, Random.value) * 10;
         layer0.noiseThreshould = 0;
         //layer0.noiseThreshould = Random.Range(0.0f, 0.8f);
@@ -568,7 +569,17 @@ public class Interations : MonoBehaviour
         layer1.noiseStrength = Random.Range(0.1f, 0.2f);
 
         currentPlanet.earthHeightColor.SetKeys(colorKeys, currentPlanet.earthHeightColor.alphaKeys);
+
+        if(Random.value < 0.5f)
+        {
+            currentPlanet.overAllNoiseFactor = Random.Range(0.03f, 0.08f);
+        }
+        else
+        {
+            currentPlanet.overAllNoiseFactor = Random.Range(0.02f, 0.03f);
+        }
         currentPlanet.Generate();
+        manager.SetTitle(GetRandomName());
     }
 
     [Button]
@@ -583,5 +594,14 @@ public class Interations : MonoBehaviour
         manager.orbtis.SetActive(false);
         manager.SetCurPlanet(GetComponent<Earth>());
         manager.SetTitle(gameObject.name);
+    }
+
+    public string GetRandomName()
+    {
+        string ret = "";
+        ret = "M" + Random.Range(30, 89) + "." + Random.Range(1000, 9999);
+
+
+        return ret;
     }
 }

@@ -14,6 +14,7 @@ public class MySceneManager : MonoBehaviour
 
     Earth curPlanet;
 
+    public GameObject orbitSwitch;
     public GameObject orbtis;
     public Text title;
     public float camBackDt = 1.5f;
@@ -26,6 +27,8 @@ public class MySceneManager : MonoBehaviour
         defaultCamParent = cam.transform.parent;
         defaultCamPosi = cam.transform.position;
         defaultCamRot = cam.transform.rotation;
+
+        orbitSwitch.SetActive(false);
         SetTitle("");
     }
 
@@ -53,6 +56,11 @@ public class MySceneManager : MonoBehaviour
 
             orbtis.SetActive(true);
             SetTitle("");
+        }
+
+        if(Input.GetKeyDown(KeyCode.O))
+        {
+            orbitSwitch.SetActive(!orbitSwitch.activeSelf);
         }
     }
 

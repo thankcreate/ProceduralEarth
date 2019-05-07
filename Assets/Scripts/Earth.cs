@@ -157,6 +157,12 @@ public class Earth : MonoBehaviour
 
         Vector3[] directions = { Vector3.up, Vector3.down, Vector3.left, Vector3.right, Vector3.forward, Vector3.back };
 
+        //if(meshRoot.childCount == 0)
+        //{
+
+        //    for (int i = 0; i < meshFilters.Length; i++)
+        //        meshFilters[i] = null;
+        //}
 
         for (int i = 0; i < 6; i++)
         {
@@ -165,6 +171,7 @@ public class Earth : MonoBehaviour
                 GameObject meshObj = new GameObject("mesh");
                 meshObj.transform.parent = meshRoot;
                 meshObj.transform.localPosition = Vector3.zero;
+                meshObj.transform.localEulerAngles = Vector3.zero;
 
                 meshObj.AddComponent<MeshRenderer>();
                 meshFilters[i] = meshObj.AddComponent<MeshFilter>();

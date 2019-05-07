@@ -43,7 +43,7 @@ Shader "AfEarth"
 }
 /*ASEBEGIN
 Version=16700
-371.3333;72.66667;940;573;1958.171;518.7536;2.294758;True;False
+319.3333;72.66667;1073;847;1610.966;353.5371;1.666654;True;False
 Node;AmplifyShaderEditor.PosVertexDataNode;1;-1038.311,206.399;Float;False;0;0;5;FLOAT3;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
 Node;AmplifyShaderEditor.LengthOpNode;3;-795.349,216.5642;Float;False;1;0;FLOAT3;0,0,0;False;1;FLOAT;0
 Node;AmplifyShaderEditor.RangedFloatNode;11;-903.7766,397.8995;Float;False;Property;_Max;Max;1;0;Create;False;0;0;False;0;0;0;0;0;0;1;FLOAT;0
@@ -65,4 +65,4 @@ WireConnection;14;0;9;0
 WireConnection;12;1;14;0
 WireConnection;0;0;12;0
 ASEEND*/
-//CHKSM=83BA2593427BF111BF0918EF9919B5E70974FADD
+//CHKSM=84F9A622576B5ADA8DA670DEA4E5D1922CC946EB
